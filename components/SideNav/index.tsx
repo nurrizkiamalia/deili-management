@@ -1,10 +1,12 @@
 "use client";
 
-import { RiMenu2Line, RiDashboardHorizontalLine, RiNotification4Line } from "react-icons/ri";
-import { IoIosArrowDown } from "react-icons/io";
+import { useState } from "react";
+import { RiMenu2Line, RiDashboardHorizontalLine, RiNotification4Line, RiLogoutBoxRLine } from "react-icons/ri";
 import { TbPointFilled } from "react-icons/tb";
 import { GoProject } from "react-icons/go";
+import { useUser } from "@/hooks/useUser";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 
 interface SideNavProps {
   isOpen: boolean;
@@ -17,6 +19,19 @@ const projects = [
 ];
 
 const SideNav: React.FC<SideNavProps> = ({ isOpen, setIsOpen }) => {
+  const { user, loading } = useUser();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const getUserInitials = () => {
+    if (!user) return "U"; 
+    const initials = `${user.firstName[0] || ""}${user.lastName[0] || ""}`.toUpperCase();
+    return initials;
+  };
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/login" });
+  };
+
   return (
     <div
       className="relative h-screen w-fit hidden md:flex"
@@ -29,7 +44,6 @@ const SideNav: React.FC<SideNavProps> = ({ isOpen, setIsOpen }) => {
           isOpen ? "-translate-x-full" : "translate-x-0"
         }`}
       >
-        {/* Closed Sidebar Content */}
         <div className="flex flex-col h-full items-center">
           <h1 className="p-5 text-center font-bold text-xl">D</h1>
           <hr className="border-dashed border-dspGray" />
@@ -38,7 +52,9 @@ const SideNav: React.FC<SideNavProps> = ({ isOpen, setIsOpen }) => {
             <GoProject className="text-dspOrange text-xl" />
           </div>
           <div className="h-full w-full flex items-end justify-center pb-5">
-            <div className="w-12 h-12 bg-dspGray rounded-full" />
+            <div className="w-12 h-12 bg-dspGray rounded-full flex items-center justify-center text-white font-bold">
+              {getUserInitials()}
+            </div>
           </div>
         </div>
       </div>
@@ -49,9 +65,10 @@ const SideNav: React.FC<SideNavProps> = ({ isOpen, setIsOpen }) => {
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Open Sidebar Content */}
         <div className="flex flex-col h-full">
-          <Link className="px-10 py-5 text-xl font-bold" href="/">Deili Management.</Link>
+          <Link className="px-5 py-5 text-xl font-bold" href="/">
+            Deili Management.
+          </Link>
           <hr className="border-dashed border-dspGray" />
 
           {/* Main Menu */}
@@ -89,18 +106,57 @@ const SideNav: React.FC<SideNavProps> = ({ isOpen, setIsOpen }) => {
             </div>
           </div>
 
+          <hr className="border-dashed border-dspGray" />
+
           {/* User Info */}
           <div className="h-full w-full flex items-end p-5">
-            <div className="w-full p-3 bg-dspLightPink border-2 border-dspLightGray flex items-center gap-2 rounded-xl">
-              <div className="w-12 h-12 bg-dspGray rounded-full" />
-              <div className="text-sm font-semibold">
-                <h2>Amalia</h2>
-                <p className="text-dspGray text-xs">Software Engineer</p>
+            {loading ? (
+              <div>Loading...</div>
+            ) : user ? (
+              <div
+                className="relative w-full"
+                onMouseLeave={() => setIsDropdownOpen(false)}
+              >
+                <div
+                  onClick={() => setIsDropdownOpen((prev) => !prev)}
+                  className="w-full p-3 bg-dspLightPink border-2 border-dspLightGray flex items-center gap-2 rounded-xl cursor-pointer"
+                >
+                  <div className="w-12 h-12 bg-dspGray rounded-full flex items-center justify-center text-white font-bold">
+                    {getUserInitials()}
+                  </div>
+                  <div className="text-sm font-semibold">
+                    <h2 className="text-dspDarkGray font-semibold">{`${user.firstName} ${user.lastName}`}</h2>
+                  </div>
+                </div>
+
+                {/* Dropdown Menu */}
+                {isDropdownOpen && (
+                  <div
+                    className="absolute z-50 left-40 -top-4 w-full mt-2 bg-white rounded-lg shadow-lg border-2 font-semibold"
+                  >
+                    <Link
+                      href="/profile"
+                      className="block px-4 py-2 text-dspDarkGray hover:bg-dspLightGray"
+                    >
+                      Profile
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-red-500 hover:bg-dspLightGray"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
               </div>
-              <button className="p-1 rounded-full border-2 border-dspOrange text-dspOrange">
-                <IoIosArrowDown />
-              </button>
-            </div>
+            ) : (
+              <div
+                className="h-full w-full flex items-end p-5 gap-5 justify-center font-bold"
+                onMouseLeave={() => setIsDropdownOpen(false)}
+              >
+                <Link href="/login">Login</Link> | <Link href="/register">Register</Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

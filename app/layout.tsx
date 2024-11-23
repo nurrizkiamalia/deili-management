@@ -1,8 +1,9 @@
-// app/layout.tsx (or wherever your layout file is located)
 import type { Metadata } from "next";
 import { Urbanist, DM_Sans } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "@/components/ClientLayout";
+import ApolloWrapper from "@/components/ApolloWrapper";
+import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 
 const urbanist = Urbanist({
   subsets: ["latin"],
@@ -31,7 +32,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${urbanist.className} ${dmsans.variable} antialiased`}>
-        <ClientLayout>{children}</ClientLayout>
+        <ApolloWrapper>
+          <SessionProviderWrapper>
+            <ClientLayout>{children}</ClientLayout>
+          </SessionProviderWrapper>
+        </ApolloWrapper>
       </body>
     </html>
   );
