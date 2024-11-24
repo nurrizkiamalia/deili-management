@@ -1,6 +1,6 @@
 import { useQuery } from "@apollo/client";
 import { useState } from "react";
-import { GET_ALL_ROLES, GET_ROLE_BY_ID, GET_ROLES_BY_DEPARTMENT } from "@/graphql/queries";
+import { GET_ALL_ROLES, GET_ROLE_BY_ID, GET_ROLES_BY_DEPARTMENT } from "@/graphql/query/departmentRoleQuery";
 
 export const useRoles = () => {
   const {

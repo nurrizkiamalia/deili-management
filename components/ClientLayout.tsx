@@ -26,7 +26,7 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
       {/* Main Content Area */}
       <div
         className={`w-full transition-all duration-500 ease-in-out p-5 ${
-          isSidebarOpen ? "md:ml-[270px]" : "md:ml-20"
+          isSidebarOpen ? "md:ml-[17%]" : "md:ml-20"
         }`}
       >
         {children}

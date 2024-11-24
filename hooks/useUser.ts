@@ -1,8 +1,8 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@apollo/client";
-import { REGISTER_USER, REQUEST_PASSWORD_RESET, RESET_PASSWORD, UPDATE_PROFILE_MUTATION, VERIFY_EMAIL } from "@/graphql/mutations";
-import { GET_USER_PROFILE } from "@/graphql/queries";
+import { REGISTER_USER, REQUEST_PASSWORD_RESET, RESET_PASSWORD, UPDATE_PROFILE_MUTATION, VERIFY_EMAIL } from "@/graphql/mutation/userMutation";
+import { GET_USER_PROFILE } from "@/graphql/query/userQuery";
 
 export const useAuth = () => {
   const { data: session, status } = useSession();

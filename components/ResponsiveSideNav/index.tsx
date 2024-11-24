@@ -47,17 +47,17 @@ const ResponsiveSideNav: React.FC = () => {
           isDropdownOpen ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="flex flex-col w-full bg-dspLightPink p-5 border-t-2 border-dspLightGray">
+        <div className="flex flex-col w-full bg-dspLightPink p-5 border-t-2 border-dspLightGray text-dspBlack">
           {/* Main Menu */}
           <div className="py-3">
-            <p className="font-dmsans flex items-center gap-3 font-semibold text-dspGray">
+            <p className="font-dmsans flex items-center gap-3 font-semibold py-1 px-3 border-2 rounded-lg">
               <RiMenu2Line className="text-dspOrange text-xl" /> MAIN MENU
             </p>
-            <div className="flex flex-col gap-3 ml-4 font-bold text-dspGray mt-3">
-              <Link className="flex items-center gap-1" href="/">
+            <div className="flex flex-col gap-3 ml-4 font-bold mt-3">
+              <Link className="flex items-center gap-1 hover:text-dspOrange" href="/">
                 <RiDashboardHorizontalLine /> Dashboard
               </Link>
-              <button className="flex items-center gap-1">
+              <button className="flex items-center gap-1 hover:text-dspOrange">
                 <RiNotification4Line /> Notification
               </button>
             </div>
@@ -66,8 +66,8 @@ const ResponsiveSideNav: React.FC = () => {
           <hr className="border-dashed border-dspGray my-3" />
 
           {/* Projects */}
-          <div className="py-3">
-            <p className="font-dmsans flex items-center gap-3 font-semibold text-dspGray">
+          <div className="py-3 text-dspBlack">
+            <p className="font-dmsans flex items-center gap-3 font-semibold py-1 px-3 border-2 rounded-lg">
               <GoProject className="text-dspOrange text-xl" /> PROJECT
             </p>
             <div className="flex flex-col gap-3 ml-4 mt-3">
@@ -75,7 +75,7 @@ const ResponsiveSideNav: React.FC = () => {
                 <Link
                   href={project.link}
                   key={index}
-                  className="flex items-center gap-1 font-semibold text-dspGray"
+                  className="flex items-center gap-1 font-semibold hover:text-dspOrange"
                 >
                   <TbPointFilled /> {project.name}
                 </Link>

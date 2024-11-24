@@ -1,4 +1,4 @@
-import { GET_ALL_DEPARTMENTS, GET_DEPARTMENT_BY_ID } from "@/graphql/queries";
+import { GET_ALL_DEPARTMENTS, GET_DEPARTMENT_BY_ID } from "@/graphql/query/departmentRoleQuery";
 import { useQuery } from "@apollo/client";
 
 export const useDepartments = () => {

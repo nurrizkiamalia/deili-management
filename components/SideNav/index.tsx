@@ -66,21 +66,21 @@ const SideNav: React.FC<SideNavProps> = ({ isOpen, setIsOpen }) => {
         }`}
       >
         <div className="flex flex-col h-full">
-          <Link className="px-5 py-5 text-xl font-bold" href="/">
-            Deili Management.
+          <Link className="p-5 text-xl font-black text-center" href="/">
+            Deili.
           </Link>
           <hr className="border-dashed border-dspGray" />
 
           {/* Main Menu */}
-          <div className="py-5 px-10 flex flex-col gap-3">
-            <p className="font-dmsans flex items-center gap-3 font-semibold text-dspGray">
+          <div className="p-5 flex flex-col gap-3 text-dspBlack">
+            <p className="font-dmsans flex items-center gap-3 font-semibold py-1 px-3 border-2 rounded-lg">
               <RiMenu2Line className="text-dspOrange text-xl" /> MAIN MENU
             </p>
-            <div className="flex flex-col gap-3 ml-8 font-bold text-dspGray">
-              <Link className="flex items-center gap-1" href="/">
+            <div className="flex flex-col gap-3 ml-8 font-semibold">
+              <Link className="flex items-center gap-1 hover:text-dspOrange " href="/">
                 <RiDashboardHorizontalLine /> Dashboard
               </Link>
-              <button className="flex items-center gap-1">
+              <button className="flex items-center gap-1 hover:text-dspOrange">
                 <RiNotification4Line /> Notification
               </button>
             </div>
@@ -89,8 +89,8 @@ const SideNav: React.FC<SideNavProps> = ({ isOpen, setIsOpen }) => {
           <hr className="border-dashed border-dspGray" />
 
           {/* Projects */}
-          <div className="py-5 px-10 flex flex-col gap-3">
-            <p className="font-dmsans flex items-center gap-3 font-semibold text-dspGray">
+          <div className="p-5 flex flex-col gap-3 text-dspBlack">
+            <p className="font-dmsans flex items-center gap-3 font-semibold py-1 px-3 border-2 rounded-lg">
               <GoProject className="text-dspOrange text-xl" /> PROJECT
             </p>
             <div className="flex flex-col gap-3 ml-8">
@@ -98,7 +98,7 @@ const SideNav: React.FC<SideNavProps> = ({ isOpen, setIsOpen }) => {
                 <Link
                   href={project.link}
                   key={index}
-                  className="flex items-center gap-1 font-semibold text-dspGray"
+                  className="flex items-center gap-1 font-semibold hover:text-dspOrange"
                 >
                   <TbPointFilled /> {project.name}
                 </Link>
@@ -154,7 +154,7 @@ const SideNav: React.FC<SideNavProps> = ({ isOpen, setIsOpen }) => {
                 className="h-full w-full flex items-end p-5 gap-5 justify-center font-bold"
                 onMouseLeave={() => setIsDropdownOpen(false)}
               >
-                <Link href="/login">Login</Link> | <Link href="/register">Register</Link>
+                <Link href="/login" className="hover:text-dspOrange">Login</Link> | <Link href="/register" className="hover:text-dspOrange">Register</Link>
               </div>
             )}
           </div>

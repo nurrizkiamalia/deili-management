@@ -12,7 +12,7 @@ const BoardCard: React.FC<BoardCardProps> = ({ board, onDueDateChange }) => {
       <button className="self-end">
         <MdMoreVert />
       </button>
-      <h3 className="font-bold">{board.boardName}</h3>
+      <h3 className="font-bold line-clamp-1">{board.boardName}</h3>
       <p className="text-lg line-clamp-2">{board.boardDesc}</p>
     </div>
   );
