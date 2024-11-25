@@ -20,9 +20,9 @@ export default function Home() {
     return <div className="bg-green-100 w-full p-5 mt-10 font-semibold text-center">Loading home page...</div>;
   }
 
-  if (error) {
-    return <div className="p-5 text-red-600">Failed to load user data: {error.message}</div>;
-  }
+  // if (error) {
+  //   return <div className="p-5 text-red-600">Failed to load user data: {error.message}</div>;
+  // }
 
   return (
     <div className="flex flex-col w-full min-h-[90vh] h-full rounded-xl border-2">
@@ -48,11 +48,17 @@ export default function Home() {
           <AddBoard />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-          {project.map((board) => (
-            <Link key={board.boardId} href={`/board/${board.boardId}`}>
-              <BoardCard board={board} onDueDateChange={handleDueDateChange} />
-            </Link>
-          ))}
+          {project.length > 0 ? (
+            project.map((board) => (
+              <Link key={board.boardId} href={`/board/${board.boardId}`}>
+                <BoardCard board={board} onDueDateChange={handleDueDateChange} />
+              </Link>
+            ))
+          ) : (
+            <div className="text-center w-full col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-4">
+              <p className="text-gray-500 text-lg">The board is empty.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

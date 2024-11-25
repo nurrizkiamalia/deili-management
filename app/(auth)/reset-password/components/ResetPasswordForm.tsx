@@ -1,33 +1,44 @@
 "use client";
 
 import React, { useState } from "react";
-import * as Yup from "yup";
 import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
 import Buttons from "@/components/Buttons";
-import Link from "next/link";
+import { usePasswordReset } from "@/hooks/useUser";
 import { TbEye, TbEyeClosed } from "react-icons/tb";
-import { useAuth } from "@/hooks/useUser";
+import { useRouter } from "next/navigation";
 
 const validationSchema = Yup.object().shape({
-  email: Yup.string().email("Invalid email").required("Email is required"),
-  password: Yup.string().required("Password is required"),
+  password: Yup.string()
+    .min(8, "Password must be at least 8 characters")
+    .required("Password is required"),
 });
 
-const LoginForm: React.FC = () => {
+interface ResetPasswordProps {
+  email: string;
+  token: string;
+}
+
+const ResetPasswordForm: React.FC<ResetPasswordProps> = ({
+  email,
+  token,
+}) => {
+  const { resetPassword } = usePasswordReset();
+  const [loading, setLoading] = useState(false);
   const labelStyle = "text-dspDarkGray font-semibold";
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const router = useRouter();
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
-  const handleSubmit = async (values: { email: string; password: string }) => {
+  const handleSubmit = async (values: { password: string }) => {
     setLoading(true);
     try {
-      await login(values.email, values.password);
-      alert("Login successful!");
+      await resetPassword(email, token, values.password);
+      alert("Password reset successful!");
+      router.push('/login')
     } catch (error: any) {
-      alert(`Login failed: ${error.message}`);
+      alert(`Failed to reset password: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -35,34 +46,13 @@ const LoginForm: React.FC = () => {
 
   return (
     <Formik
-      initialValues={{
-        email: "",
-        password: "",
-      }}
+      initialValues={{ password: "" }}
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ handleSubmit }) => (
-        <Form onSubmit={handleSubmit} className="w-full md:w-[80%] lg:w-[30%]">
+      {() => (
+        <Form className="w-full md:w-[80%] lg:w-[30%]">
           <div className="flex flex-col gap-4 w-full">
-            {/* Email */}
-            <div className="flex flex-col gap-1 w-full">
-              <label htmlFor="email" className={`${labelStyle}`}>
-                Email
-              </label>
-              <Field
-                name="email"
-                type="email"
-                placeholder="Enter your email"
-                className="input py-2 px-3 rounded-xl border-2 w-full"
-              />
-              <ErrorMessage
-                name="email"
-                component="div"
-                className="text-red-500 text-sm"
-              />
-            </div>
-
             {/* Password */}
             <div className="flex flex-col gap-1 relative w-full">
               <label htmlFor="password" className={`${labelStyle}`}>
@@ -91,16 +81,9 @@ const LoginForm: React.FC = () => {
               />
             </div>
 
-            <Link
-              href="/reset-password-request"
-              className="text-dspOrange font-semibold hover:scale-105 transition-all duration-300"
-            >
-              Reset Password
-            </Link>
-
             {/* Submit Button */}
             <Buttons type="submit" className="self-center">
-              {loading ? "Logging in..." : "Login"}
+              {loading ? "Resetting..." : "Reset Password"}
             </Buttons>
           </div>
         </Form>
@@ -109,4 +92,4 @@ const LoginForm: React.FC = () => {
   );
 };
 
-export default LoginForm;
+export default ResetPasswordForm;
