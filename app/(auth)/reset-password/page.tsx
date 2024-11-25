@@ -3,15 +3,17 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import ResetPasswordForm from "./components/ResetPasswordForm";
+import { Suspense } from "react";
 
-const ResetPassword: React.FC = () => {
+const ResetPasswordContent: React.FC = () => {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const token = searchParams.get("token");
+
   useEffect(() => {
     if (token) {
       try {
-        const decodedToken = decodeToken(token); 
+        const decodedToken = decodeToken(token);
         setEmail(decodedToken.email);
       } catch (error) {
         console.error("Invalid or expired token");
@@ -21,7 +23,7 @@ const ResetPassword: React.FC = () => {
   }, [token]);
 
   const decodeToken = (token: string): { email: string; expiry: string } => {
-    const decoded = atob(token); 
+    const decoded = atob(token); // Decode the Base64-encoded token
     const [_, email, expiry] = decoded.split("|");
     if (new Date(expiry).getTime() < Date.now()) {
       throw new Error("Token expired");
@@ -43,5 +45,11 @@ const ResetPassword: React.FC = () => {
     </div>
   );
 };
+
+const ResetPassword: React.FC = () => (
+  <Suspense fallback={<div>Loading reset password page...</div>}>
+    <ResetPasswordContent />
+  </Suspense>
+);
 
 export default ResetPassword;
