@@ -59,6 +59,12 @@ export const RESET_PASSWORD = gql`
   }
 `;
 
+export const RESEND_VERIFICATION_EMAIL = gql`
+  mutation ResendVerificationEmail($userId: ID!) {
+    resendVerificationEmail(userId: $userId)
+  }
+`;
+
 export const VERIFY_EMAIL = gql`
   mutation VerifyUserEmail($token: String!) {
     verifyUserEmail(token: $token)

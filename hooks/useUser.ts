@@ -1,7 +1,7 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@apollo/client";
-import { REGISTER_USER, REQUEST_PASSWORD_RESET, RESET_PASSWORD, UPDATE_PROFILE_MUTATION, VERIFY_EMAIL } from "@/graphql/mutation/userMutation";
+import { REGISTER_USER, REQUEST_PASSWORD_RESET, RESEND_VERIFICATION_EMAIL, RESET_PASSWORD, UPDATE_PROFILE_MUTATION, VERIFY_EMAIL } from "@/graphql/mutation/userMutation";
 import { GET_USER_PROFILE } from "@/graphql/query/userQuery";
 
 export const useAuth = () => {
@@ -121,6 +121,17 @@ export const usePasswordReset = () => {
     requestPasswordReset,
     resetPassword,
   };
+};
+
+export const useResendVerificationEmail = () => {
+  const [resendEmail] = useMutation(RESEND_VERIFICATION_EMAIL);
+
+  const resendVerificationEmail = async (userId: string) => {
+    const { data } = await resendEmail({ variables: { userId } });
+    return data?.resendVerificationEmail;
+  };
+
+  return { resendVerificationEmail };
 };
 
 export const useVerifyEmail = () => {

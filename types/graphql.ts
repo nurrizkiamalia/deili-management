@@ -14,6 +14,7 @@ export interface LoginResponse {
     email: string;
     phoneNumber: string;
     jobRole: number;
+    isVerified: boolean;
   }
   
   export interface RegistrationRequest {

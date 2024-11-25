@@ -9,6 +9,7 @@ export const GET_USER_PROFILE = gql`
       email
       phoneNumber
       jobRole
+      isVerified
     }
   }
 `;
