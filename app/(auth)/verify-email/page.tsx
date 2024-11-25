@@ -1,11 +1,11 @@
 'use client';
 
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useVerifyEmail } from '@/hooks/useUser';
 
-const VerifyEmail: React.FC = () => {
+const VerifyEmailContent: React.FC = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
@@ -31,7 +31,7 @@ const VerifyEmail: React.FC = () => {
           }, 3000);
         } catch (error: any) {
           setStatus('error');
-          setAlertMessage('Your email is already verified.');
+          setAlertMessage('Verification failed. Please try again.');
           router.push('/');
         }
       } else {
@@ -61,6 +61,14 @@ const VerifyEmail: React.FC = () => {
       {/* Loading Message */}
       {status === 'loading' && <div className="text-center mt-4">Verifying your email...</div>}
     </div>
+  );
+};
+
+const VerifyEmail: React.FC = () => {
+  return (
+    <Suspense fallback={<div className="text-center mt-4">Loading...</div>}>
+      <VerifyEmailContent />
+    </Suspense>
   );
 };
 
