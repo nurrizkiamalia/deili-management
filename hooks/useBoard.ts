@@ -55,7 +55,7 @@ export const useCreateBoard = () => {
     boardName: string;
     boardDesc: string;
     isComplete: boolean;
-    userId: number;
+    userId: string;
   }) => {
     try {
       const response = await createBoard({ variables });
