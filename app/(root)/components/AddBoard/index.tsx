@@ -1,3 +1,5 @@
+"use client"
+
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import Buttons from "@/components/Buttons";
@@ -11,13 +13,26 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { FaPlus } from "react-icons/fa";
+import { useCreateBoard } from "@/hooks/useBoard";
+import { useSession } from "next-auth/react";
+import { useState } from 'react';
 
-const AddBoard: React.FC = () => {
+interface AddBoardProps {
+  onBoardAdded: (newBoard: any) => void;
+}
+
+const AddBoard: React.FC<AddBoardProps> = ({ onBoardAdded }) => {
+  const { data: session } = useSession();
+  const { handleCreateBoard, loading, error } = useCreateBoard();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const validationSchema = Yup.object({
     boardName: Yup.string()
-      .min(3, "Board name must be at least 3 characters"),
+      .min(3, "Board name must be at least 3 characters")
+      .required("Board name is required"),
     boardDesc: Yup.string()
-      .min(10, "Board description must be at least 10 characters"),
+      .min(10, "Board description must be at least 10 characters")
+      .required("Board description is required"),
   });
 
   const formik = useFormik({
@@ -26,13 +41,34 @@ const AddBoard: React.FC = () => {
       boardDesc: '',
     },
     validationSchema,
-    onSubmit: (values) => {
-      console.log("Form Values:", values);
+    onSubmit: async (values, { resetForm }) => {
+      if (!session?.user?.id) {
+        alert("User not logged in");
+        return;
+      }
+
+      try {
+        const boardRequestDto = {
+          boardName: values.boardName,
+          boardDesc: values.boardDesc,
+          isComplete: false,
+          userId: session.user.id,
+        };
+        
+        const response = await handleCreateBoard(boardRequestDto);
+        onBoardAdded(response.createBoard);
+        alert("Board created successfully!");
+        resetForm();
+        setIsDialogOpen(false);
+      } catch (err) {
+        console.error("Error creating board:", err);
+        alert("Failed to create board. Please try again.");
+      }
     },
   });
 
   return (
-    <Dialog>
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
         <Buttons>New Board <FaPlus /></Buttons>
       </DialogTrigger>
@@ -41,11 +77,10 @@ const AddBoard: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Add Board Project</DialogTitle>
             <DialogDescription>
-              Give title and description to your project.
+              Provide a title and description for your project.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-5">
-            {/* Board Name Field */}
             <div>
               <label htmlFor="boardName" className="block text-sm font-medium text-gray-700">
                 Board Name
@@ -68,7 +103,6 @@ const AddBoard: React.FC = () => {
               )}
             </div>
 
-            {/* Board Description Field */}
             <div>
               <label htmlFor="boardDesc" className="block text-sm font-medium text-gray-700">
                 Board Description
@@ -91,9 +125,14 @@ const AddBoard: React.FC = () => {
             </div>
           </div>
           <DialogFooter>
-            <Buttons type="submit">Save changes</Buttons>
+            <Buttons type="submit" disabled={loading}>
+              {loading ? "Saving..." : "Save changes"}
+            </Buttons>
           </DialogFooter>
         </form>
+        {error && (
+          <p className="mt-2 text-red-500 text-sm">Error: {error.message}</p>
+        )}
       </DialogContent>
     </Dialog>
   );

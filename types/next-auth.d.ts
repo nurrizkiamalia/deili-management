@@ -5,7 +5,7 @@ declare module "next-auth" {
   interface Session {
     accessToken?: string;
     user?: {
-      id?: string;
+      id?: number;
       role?: string;
       jobRole?: string;
       isVerified?: boolean;
@@ -14,7 +14,7 @@ declare module "next-auth" {
 
   interface User extends DefaultUser {
     token: string;
-    id?: string;
+    id?: number;
     role?: string;
     jobRole?: string;
     isVerified?: boolean;
@@ -24,7 +24,7 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     accessToken?: string;
-    id?: string;
+    id?: number;
     role?: string;
     jobRole?: string;
     isVerified?: boolean;

@@ -1,28 +1,42 @@
 "use client";
 
-import { FaPlus } from "react-icons/fa";
-import Link from "next/link"; 
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import BoardCard from "./components/BoardCard";
-import Buttons from "@/components/Buttons";
-import { project } from "@/data/data"; 
 import ResendVerification from "./components/ResendVerification";
-import { useUser } from "@/hooks/useUser";
 import AddBoard from "./components/AddBoard";
+import { useUser } from "@/hooks/useUser";
+import { useBoardByUser } from "@/hooks/useBoard";
 
 export default function Home() {
-  const { user, loading, error } = useUser();
+  const { user, loading: userLoading, error: userError } = useUser();
 
-  const handleDueDateChange = (cardId: number, newDate: Date | null) => {
-    console.log(`Card ID: ${cardId}, New Due Date: ${newDate}`);
+  const userId = user?.id;
+  const { boardByUser: initialBoards, loading: boardsLoading, error: boardsError } = useBoardByUser(userId);
+
+  const [boards, setBoards] = useState(initialBoards || []);
+
+  useEffect(() => {
+    if (initialBoards) {
+      setBoards(initialBoards);
+    }
+  }, [initialBoards]);
+
+  const handleBoardAdded = (newBoard: any) => {
+    setBoards((prevBoards: any) => [newBoard, ...prevBoards]);
   };
 
-  if (loading) {
+  if (userLoading || boardsLoading) {
     return <div className="bg-green-100 w-full p-5 mt-10 font-semibold text-center">Loading home page...</div>;
   }
 
-  // if (error) {
-  //   return <div className="p-5 text-red-600">Failed to load user data: {error.message}</div>;
-  // }
+  if (userError) {
+    return <div className="p-5 text-red-600">Failed to load user data: {userError.message}</div>;
+  }
+
+  if (boardsError) {
+    return <div className="p-5 text-red-600">Failed to load boards: {boardsError.message}</div>;
+  }
 
   return (
     <div className="flex flex-col w-full min-h-[90vh] h-full rounded-xl border-2">
@@ -45,14 +59,12 @@ export default function Home() {
             placeholder="Search Board..."
             className="p-2 border-2 border-dspLightGray rounded-xl w-full sm:w-60 text-dspDarkGray hover:shadow-md"
           />
-          <AddBoard />
+          <AddBoard onBoardAdded={handleBoardAdded} />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-          {project.length > 0 ? (
-            project.map((board) => (
-              <Link key={board.boardId} href={`/board/${board.boardId}`}>
-                <BoardCard board={board} onDueDateChange={handleDueDateChange} />
-              </Link>
+          {boards.length > 0 ? (
+            boards.map((board: any) => (
+              <BoardCard board={board} />
             ))
           ) : (
             <div className="text-center w-full col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-4">
@@ -60,6 +72,10 @@ export default function Home() {
             </div>
           )}
         </div>
+        {/* <hr className="border-2" />
+        <div>
+          <h2 className="text-3xl font-bold">Completed Project</h2>
+        </div> */}
       </div>
     </div>
   );

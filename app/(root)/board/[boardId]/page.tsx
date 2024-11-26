@@ -57,11 +57,10 @@ const BoardPage = () => {
       targetLane.cards = [...(targetLane.cards || []), cardToMove];
 
       const updatedProject = project.map((b) => (b.boardId === updatedBoard.boardId ? updatedBoard : b));
-      setProject(updatedProject as boards[]); // Cast updatedProject as boards[]
+      setProject(updatedProject as boards[]); 
     }
   };
 
-  // Move Lane (Reorder Lanes)
   const moveLane = (fromIndex: number, toIndex: number) => {
     const updatedLanes = [...(board?.lanes || [])];
     const [movedLane] = updatedLanes.splice(fromIndex, 1);
