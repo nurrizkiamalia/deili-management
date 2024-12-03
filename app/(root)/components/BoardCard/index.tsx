@@ -53,7 +53,7 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
 
   return (
     <div
-      className="relative bg-white shadow-md border hover:shadow-xl transition-all duration-500 rounded-xl flex flex-col gap-2 p-3 text-xl"
+      className={` relative bg-white shadow-md border hover:shadow-xl transition-all duration-500 rounded-xl flex flex-col gap-2 p-3 text-xl`}
       onMouseLeave={closeMenu}
     >
       <div className="flex justify-between items-center w-full">
@@ -93,7 +93,7 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
         </div>
       )}
 
-      <h3
+      <h3 
         onClick={handleTitleClick}
         className="font-bold line-clamp-1 hover:text-dspOrange cursor-alias"
       >

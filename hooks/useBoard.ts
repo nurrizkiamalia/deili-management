@@ -14,6 +14,7 @@ import {
   GET_BOARD_BY_ID,
   GET_BOARD_BY_USER,
 } from "@/graphql/query/boardQuery";
+import { boards } from "@/types/datatypes";
 
 export const useBoards = () => {
   const { data, loading, error } = useQuery(GET_ALL_BOARDS);
@@ -29,21 +30,31 @@ export const useBoardByUser = (userId: number) => {
     variables: { userId },
     skip: !userId,
   });
+
+  const pendingInvitations = data?.getBoardByUser?.filter((board: boards) => 
+    board.assignees.some((assignee) => {
+      return assignee.userId === userId && assignee.status === 'PENDING';
+    })
+  ) || []; 
+
   return {
+    pendingInvitations,
     boardByUser: data?.getBoardByUser,
     loading,
     error,
   };
 };
 
+
 export const useBoardById = (id: number) => {
-  const { data, loading, error } = useQuery(GET_BOARD_BY_ID, {
+  const { data, refetch, loading, error } = useQuery(GET_BOARD_BY_ID, {
     variables: { id },
     skip: !id,
   });
   return {
     board: data?.getBoardById,
     loading,
+    refetch,
     error,
   };
 };
@@ -55,7 +66,7 @@ export const useCreateBoard = () => {
     boardName: string;
     boardDesc: string;
     isComplete: boolean;
-    userId: string;
+    userId: string | number;
   }) => {
     try {
       const response = await createBoard({ variables });
@@ -75,12 +86,17 @@ export const useCreateBoard = () => {
 };
 
 export const useUpdateBoard = () => {
-  const [updateBoard] = useMutation(UPDATE_BOARD);
-  const handleUpdateBoard = async (id: number, boardRequestDTO: any) => {
-    const { data } = await updateBoard({
-      variables: { id, boardRequestDTO },
-    });
-    return data?.updateBoard;
+  const [updateBoard, { data, loading, error }] = useMutation(UPDATE_BOARD);
+  
+  const handleUpdateBoard = async (variables: {
+    id: number;
+    boardName: string;
+    boardDesc: string;
+    isComplete: boolean;
+    userId: string | number;
+  }) => {
+    const response = await updateBoard({variables});
+    return response.data;
   };
 
   const [toggleBoardCompletion] = useMutation(TOGGLE_BOARD_COMPLETION);
@@ -100,7 +116,7 @@ export const useUpdateBoard = () => {
       alert("Failed to toggle board completion. Please try again.");
     }
   };
-  return { handleUpdateBoard, handleToggleCompletion };
+  return { handleUpdateBoard, handleToggleCompletion, data, loading,error };
 };
 
 export const useDeleteBoard = () => {
@@ -131,7 +147,7 @@ export const useRespondToInvitation = () => {
   const [respondToInvitation] = useMutation(RESPOND_TO_INVITATION);
   const handleRespondToInvitation = async (
     boardId: number,
-    userId: number,
+    userId: number | string,
     accept: boolean
   ) => {
     const { data } = await respondToInvitation({

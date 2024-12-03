@@ -1,79 +1,65 @@
 "use client";
 
-import { useState } from "react";
 import { useParams } from "next/navigation";
 import Board from "./components/Board";
-import { project as initialProject } from "@/data/data";
-import { boards } from "@/types/datatypes";
+import { useBoardById } from "@/hooks/useBoard";  
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { useLanesByBoard, useReorderLanes } from '@/hooks/useLane';
+import { useEffect, useState } from "react";
+import { LaneDTO } from "@/types/datatypes";
 
 const BoardPage = () => {
   const { boardId } = useParams();
+  const id = Number(boardId);
+  const { board, loading, error } = useBoardById(id);  
+  const { handleReorderLanes } = useReorderLanes();
+  const { lanes, refetch, loading: lanesLoading, error: lanesError } = useLanesByBoard(id);
+  
+  const [sortedLanes, setSortedLanes] = useState<LaneDTO[]>([]);
 
-  if (typeof boardId !== 'string') {
-    return <p>Invalid board ID</p>;
+  useEffect(() => {
+    if (lanes?.length > 0) {
+      const sorted = [...lanes].sort((a: LaneDTO, b: LaneDTO) => a.position - b.position);
+      setSortedLanes(sorted);
+    }
+  }, [lanes]);
+
+  if (lanesLoading || loading) {
+    return <p>Loading board...</p>;
   }
 
-  const [project, setProject] = useState<boards[]>(initialProject);
-  const board = project.find((b) => b.boardId === Number(boardId));
+  if (lanesError || error) {
+    return <p>Error loading board or lanes: {lanesError?.message || error?.message}</p>;
+  }
 
-  // Handle Due Date Change
   const handleDueDateChange = (cardId: number, newDate: Date | null) => {
-    const updatedProject = project.map((b) => {
-      if (b.boardId === Number(boardId)) {
-        return {
-          ...b,
-          lanes: b.lanes?.map((lane) => ({
-            ...lane,
-            cards: lane.cards?.map((card) => {
-              if (card.cardId === cardId) {
-                return {
-                  ...card,
-                  dueDate: newDate ? newDate.toISOString() : undefined, // Set to undefined instead of null
-                };
-              }
-              return card;
-            }),
-          })),
-        };
-      }
-      return b;
-    });
-
-    setProject(updatedProject as boards[]); // Cast updatedProject as boards[]
+    console.log(`Updated card ${cardId} with new due date: ${newDate}`);
   };
 
-  // Move Card between Lanes
   const moveCard = (fromLaneId: number, toLaneId: number, cardId: number) => {
-    const updatedBoard = { ...board } as boards;
-
-    const sourceLane = updatedBoard.lanes?.find((lane) => lane.laneId === fromLaneId);
-    const targetLane = updatedBoard.lanes?.find((lane) => lane.laneId === toLaneId);
-    const cardToMove = sourceLane?.cards?.find((card) => card.cardId === cardId);
-
-    if (sourceLane && targetLane && cardToMove) {
-      sourceLane.cards = sourceLane.cards?.filter((card) => card.cardId !== cardId);
-      targetLane.cards = [...(targetLane.cards || []), cardToMove];
-
-      const updatedProject = project.map((b) => (b.boardId === updatedBoard.boardId ? updatedBoard : b));
-      setProject(updatedProject as boards[]); 
-    }
+    console.log(`Moving card ${cardId} from lane ${fromLaneId} to lane ${toLaneId}`);
   };
 
-  const moveLane = (fromIndex: number, toIndex: number) => {
-    const updatedLanes = [...(board?.lanes || [])];
+  const moveLane = async (fromIndex: number, toIndex: number) => {
+    const updatedLanes = [...sortedLanes];
     const [movedLane] = updatedLanes.splice(fromIndex, 1);
     updatedLanes.splice(toIndex, 0, movedLane);
 
-    const updatedProject = project.map((b) => {
-      if (b.boardId === board?.boardId) {
-        return { ...b, lanes: updatedLanes };
-      }
-      return b;
-    });
+    const laneIds = updatedLanes.map(lane => lane.id);
 
-    setProject(updatedProject as boards[]); 
+    try {
+      const result = await handleReorderLanes(id, laneIds);
+
+      if (result) {
+        setSortedLanes(updatedLanes);  
+        await refetch(); 
+      } else {
+        console.error('Failed to reorder lanes');
+      }
+    } catch (error) {
+      console.error('Error reordering lanes:', error);
+    }
   };
 
   if (!board) {
@@ -82,8 +68,14 @@ const BoardPage = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="w-full h-full">
-        <Board board={board} onDueDateChange={handleDueDateChange} moveLane={moveLane} moveCard={moveCard} />
+      <div className="w-full h-full overflow-x-hidden">
+        <Board
+          board={board}
+          onDueDateChange={handleDueDateChange}
+          moveLane={moveLane}
+          moveCard={moveCard}
+          lanes={sortedLanes}
+        />
       </div>
     </DndProvider>
   );

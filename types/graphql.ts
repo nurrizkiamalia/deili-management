@@ -32,6 +32,7 @@ export interface BoardCardProps {
     boardName?: string;
     boardDesc?: string;
     isComplete?: Boolean;
+    assignee: assignees[];
   };
 }
 
@@ -39,5 +40,26 @@ export interface BoardRequestDto{
   boardName: string;
   boardDesc: string;
   isComplete: boolean;
-  userId: number;
+  userId: string | number;
+}
+
+export interface assignees{
+  userId: string | number;
+  userName: string;
+  role: string;
+  email: string;
+  status: string;
+}
+
+export interface LaneDTO {
+  id: number;
+  laneName: string;
+  boardId: number;
+  position: number;
+}
+
+export interface LaneInputDTO {
+  laneName: string;
+  boardId: number;
+  position?: number;
 }

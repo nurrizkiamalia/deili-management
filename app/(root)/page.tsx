@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import BoardCard from "./components/BoardCard";
 import ResendVerification from "./components/ResendVerification";
 import AddBoard from "./components/AddBoard";
 import { useUser } from "@/hooks/useUser";
 import { useBoardByUser } from "@/hooks/useBoard";
+import { boards } from "@/types/datatypes";
 
 export default function Home() {
   const { user, loading: userLoading, error: userError } = useUser();
@@ -30,13 +30,17 @@ export default function Home() {
     return <div className="bg-green-100 w-full p-5 mt-10 font-semibold text-center">Loading home page...</div>;
   }
 
-  if (userError) {
-    return <div className="p-5 text-red-600">Failed to load user data: {userError.message}</div>;
-  }
+  // if (userError) {
+  //   return <div className="p-5 text-red-600">Failed to load user data: {userError.message}</div>;
+  // }
 
-  if (boardsError) {
-    return <div className="p-5 text-red-600">Failed to load boards: {boardsError.message}</div>;
-  }
+  // if (boardsError) {
+  //   return <div className="p-5 text-red-600">Failed to load boards: {boardsError.message}</div>;
+  // }
+
+  const filteredBoards = boards.filter((board: boards) =>
+    board.assignees?.some((assignee: any) => assignee.status === "PENDING") !== true
+  );
 
   return (
     <div className="flex flex-col w-full min-h-[90vh] h-full rounded-xl border-2">
@@ -62,8 +66,8 @@ export default function Home() {
           <AddBoard onBoardAdded={handleBoardAdded} />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-          {boards.length > 0 ? (
-            boards.map((board: any, index: number) => (
+        {filteredBoards.length > 0 ? (
+            filteredBoards.map((board: any, index: number) => (
               <BoardCard board={board} key={index} />
             ))
           ) : (

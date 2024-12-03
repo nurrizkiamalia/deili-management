@@ -5,6 +5,7 @@ import DateTimePickerComponent from "../DateTimePicker";
 import Label from "../Label";
 import TaskAssignee from "../TaskAssignee";
 import { cards } from "@/types/datatypes";
+import CardDetail from "../CardDetail";
 
 interface CardsProps {
   card: cards;
@@ -52,7 +53,10 @@ const Cards: React.FC<CardsProps> = ({
         isDragging ? "opacity-50" : ""
       }`}
     >
-      <TaskAssignee assignee={card.assignee || []} />
+      <div className="flex justify-between items-center w-full">
+        <TaskAssignee assignee={card.assignee || []} />
+        <CardDetail card={card} />
+      </div>
       <h3 className="w-full">
         <input
           type="text"

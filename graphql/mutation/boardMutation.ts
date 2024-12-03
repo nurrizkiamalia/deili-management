@@ -25,7 +25,7 @@ export const CREATE_BOARD = gql`
 `;
 
 export const UPDATE_BOARD = gql`
-  mutation UpdateBoard($id: ID!, $boardName: String, $boardDesc: String, $isComplete: Boolean!, $userId: ID!) {
+  mutation UpdateBoard($id: ID!, $boardName: String, $boardDesc: String, $isComplete: Boolean, $userId: ID) {
     updateBoard(id: $id, boardRequestDTO: {
       boardName: $boardName
       boardDesc: $boardDesc
@@ -78,9 +78,9 @@ export const INVITE_USER_TO_BOARD = gql`
 `;
 
 export const RESPOND_TO_INVITATION = gql`
-  mutation RespondToInvitation($boardId: ID!, $userId: ID!, $accept: Boolean!){
-    respondToInvitation(boardId: $boardId, userId: $userId, accept: $accept)
-  }
+mutation RespondToInvitation($boardId: ID!, $userId: ID!, $accept: Boolean!) {
+  respondToInvitation(boardId: $boardId, userId: $userId, accept: $accept)
+}
 `;
 
 export const UPDATE_BOARD_ROLE = gql`
