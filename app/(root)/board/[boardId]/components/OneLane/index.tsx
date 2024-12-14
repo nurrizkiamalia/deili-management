@@ -5,8 +5,10 @@ import { IoMdMore } from "react-icons/io";
 import { FaPlus } from "react-icons/fa";
 import { LaneDTO as LaneType } from "@/types/datatypes";
 import { useDeleteLane, useUpdateLane } from "@/hooks/useLane";
+import { useCreateCard, useCardsByLane } from "@/hooks/useCard";
 import { useDrag, useDrop } from "react-dnd";
 import AlertDialog from "@/components/AlertDialog";
+import CardWrapper from "../CardWrapper";
 
 interface OneLaneProps {
   lane: LaneType;
@@ -27,13 +29,17 @@ const OneLane: React.FC<OneLaneProps> = ({
   moveCard,
   refetchLanes,
   boardId,
-  lanes
+  lanes,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [updatedLaneName, setUpdatedLaneName] = useState(lane.laneName);
+  const [newCardName, setNewCardName] = useState("");
+  const [isInputVisible, setIsInputVisible] = useState(false); 
 
+  const { handleCreateCard, loading: creatingCard, error: createCardError } = useCreateCard();
+  const { cards, loading: loadingCards, refetch: refetchCards } = useCardsByLane(lane.id);
   const { handleDeleteLane } = useDeleteLane();
   const { handleUpdateLane } = useUpdateLane();
 
@@ -50,7 +56,7 @@ const OneLane: React.FC<OneLaneProps> = ({
     hover: (draggedItem: { index: number }) => {
       if (draggedItem.index !== index) {
         moveLane(draggedItem.index, index);
-        draggedItem.index = index; 
+        draggedItem.index = index;
       }
     },
   });
@@ -88,19 +94,44 @@ const OneLane: React.FC<OneLaneProps> = ({
         laneId: lane.id,
         laneName: updatedLaneName,
         boardId: lane.boardId,
-        position: lane.position, 
+        position: lane.position,
       });
-      refetchLanes(); 
+      refetchLanes();
     } catch (error) {
       console.error("Error updating lane:", error);
       alert("Failed to update lane. Please try again.");
     }
-  };  
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       handleLaneNameUpdate();
     }
+  };
+
+  const handleNewCard = async () => {
+    if (newCardName.trim() === "") {
+      alert("Card name cannot be empty.");
+      return;
+    }
+
+    try {
+      await handleCreateCard({
+        cardName: newCardName,
+        cardDesc: "",
+        laneId: lane.id,
+      });
+      setNewCardName("");
+      setIsInputVisible(false); 
+      refetchCards();
+    } catch (err) {
+      console.error("Failed to create card:", err);
+      alert("Failed to create card. Please try again.");
+    }
+  };
+
+  const handleBlur = () => {
+      setIsInputVisible(false); 
   };
 
   useEffect(() => {
@@ -110,19 +141,19 @@ const OneLane: React.FC<OneLaneProps> = ({
   return (
     <div
       ref={ref}
-      className={`w-72 bg-white p-2 rounded-xl flex flex-col gap-2 shadow-md ${isDragging ? "opacity-50" : ""}`}
+      className={`w-72 relative bg-white p-2 rounded-xl flex flex-col gap-2 shadow-md ${isDragging ? "opacity-50" : ""}`}
     >
-      <div className="flex gap-3 justify-center items-center w-full bg-gray-200 p-2 rounded-xl border-[3px] border-dspLightGray ">
+      <div className="flex gap-3 justify-center items-center w-full bg-gray-200 p-2 rounded-xl border-[3px] border-dspLightGray">
         <div className="flex items-center justify-center text-lg font-bold w-full">
           <input
             type="text"
             placeholder="Lane Name..."
             className="h-10 hover:border hover:border-dspLightGray text-center rounded-lg min-w-10 max-w-40 bg-transparent"
-            value={updatedLaneName} 
-            onChange={handleLaneNameChange} 
-            onKeyDown={handleKeyDown} 
+            value={updatedLaneName}
+            onChange={handleLaneNameChange}
+            onKeyDown={handleKeyDown}
           />
-          <p className="text-dspGray">(0)</p>
+          <p className="text-dspGray">({cards.length})</p>
         </div>
         <button className="text-3xl" onClick={toggleMenu}>
           <IoMdMore />
@@ -131,7 +162,7 @@ const OneLane: React.FC<OneLaneProps> = ({
 
       {isMenuOpen && (
         <div
-          className="absolute top-16 right-0 bg-white border shadow-md rounded-md w-40 z-50"
+          className="absolute top-14 right-0 bg-white border shadow-md rounded-md w-40 z-50"
           onClick={(e) => e.stopPropagation()}
         >
           <button
@@ -143,9 +174,50 @@ const OneLane: React.FC<OneLaneProps> = ({
         </div>
       )}
 
-      <button className="flex items-center gap-2 font-bold justify-center p-4 w-full border-dashed border-2 rounded-xl border-dspGray">
-        New Card <FaPlus className="text-lg" />
-      </button>
+      {/* Add Card Button */}
+      <div className="flex flex-col gap-2">
+        <button
+          className="flex items-center gap-2 font-bold justify-center p-4 w-full border-dashed border-2 rounded-xl border-dspGray"
+          onClick={() => setIsInputVisible(true)}  
+          disabled={creatingCard}
+        >
+          {creatingCard ? "Creating..." : "Add Card"} <FaPlus className="text-lg" />
+        </button>
+
+        {/* Card Input Field */}
+        {isInputVisible && (
+          <input
+            type="text"
+            className="p-2 border rounded-xl"
+            placeholder="New Card Name..."
+            value={newCardName}
+            onChange={(e) => setNewCardName(e.target.value)}
+            onBlur={handleBlur}  
+            onKeyDown={(e) => e.key === "Enter" && handleNewCard()} 
+            autoFocus
+          />
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        {loadingCards ? (
+          <p>Loading cards...</p>
+        ) : (
+          cards.map((card: any, index: number) => (
+            <CardWrapper
+              key={card.id}
+              card={card}
+              cardIndex={index}
+              laneId={lane.id}
+              onDueDateChange={onDueDateChange}
+              moveCard={moveCard}
+              boardId={boardId}
+            />
+          ))
+        )}
+      </div>
+
+      {createCardError && <p className="text-red-500 mt-2">Failed to create card. Please try again.</p>}
 
       <AlertDialog
         open={isAlertOpen}

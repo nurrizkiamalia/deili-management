@@ -19,6 +19,14 @@ export const CREATE_BOARD = gql`
         role
         email
         status
+        jobRole{
+          id
+          title
+          department{
+            id
+            name
+          }
+        }
       }
     }
   }
@@ -42,6 +50,14 @@ export const UPDATE_BOARD = gql`
         role
         email
         status
+        jobRole{
+          id
+          title
+          department{
+            id
+            name
+          }
+        }
       }
     }
   }
@@ -60,6 +76,14 @@ export const TOGGLE_BOARD_COMPLETION = gql`
         role
         email
         status
+        jobRole{
+          id
+          title
+          department{
+            id
+            name
+          }
+        }
       }
     }
   }

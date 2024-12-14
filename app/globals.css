@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+.scrollbar-none{
+  scrollbar-width: none;
+}
+
 .custom-date-time-picker {
   width: 100%;
   font-family: inherit;
@@ -91,6 +95,10 @@
 }
 
 .custom-date-time-picker .react-datetime-picker__clock {
+  display: none;
+}
+
+.react-datetime-picker__inputGroup__leadingZero{
   display: none;
 }
 

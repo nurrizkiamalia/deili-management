@@ -49,6 +49,18 @@ export interface assignees{
   role: string;
   email: string;
   status: string;
+  jobRole?: JobRole;
+}
+
+export interface JobRole{
+  id: number;
+  title: string;
+  department?: Department; 
+}
+
+export interface Department{
+  id: number;
+  name: string;
 }
 
 export interface LaneDTO {

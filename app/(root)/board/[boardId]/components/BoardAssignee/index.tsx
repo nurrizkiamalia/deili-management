@@ -1,10 +1,12 @@
-import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
+import { BoardAssigneeTooltip } from "@/components/ui/board-assignee-tooltip";
+import { JobRole } from "@/types/datatypes";
 
 interface Assignee {
   userId: string | number;
   userName: string;
-  role: string;
+  role?: string;
   status?: string;
+  jobRole?: JobRole;
 }
 
 interface BoardAssigneeProps {
@@ -13,9 +15,9 @@ interface BoardAssigneeProps {
 
 const BoardAssignee: React.FC<BoardAssigneeProps> = ({ assignees }) => {
   return (
-    <div className="m-5 !mt-0 md:mb-10 md:mx-10">
+    <div className="">
       <div className="flex flex-row items-center  w-full">
-        <AnimatedTooltip items={assignees} />
+        <BoardAssigneeTooltip items={assignees} />
       </div>
     </div>
   );

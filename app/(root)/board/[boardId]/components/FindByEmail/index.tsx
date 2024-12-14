@@ -8,22 +8,22 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useQuery } from "@apollo/client";
 import { GET_SEARCH_USER_BY_EMAIL } from "@/graphql/query/userQuery";
 import { debounce } from "lodash";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const FindByEmail: React.FC<{ onSelect: (userId: number) => void }> = ({ onSelect }) => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
   const [debouncedValue, setDebouncedValue] = useState("");
 
-  const debouncedSearch = useCallback(
-    debounce((nextValue: string) => {
-      setDebouncedValue(nextValue);
-    }, 500),
-    []
-  );
+  const debouncedSearch = debounce((nextValue: string) => {
+    setDebouncedValue(nextValue);
+  }, 500);
 
   useEffect(() => {
     debouncedSearch(value);
+    return () => {
+      debouncedSearch.cancel();
+    };
   }, [value, debouncedSearch]);
 
   const { data, loading, error } = useQuery(GET_SEARCH_USER_BY_EMAIL, {
@@ -33,7 +33,7 @@ const FindByEmail: React.FC<{ onSelect: (userId: number) => void }> = ({ onSelec
 
   const handleSelect = (email: string, userId: number) => {
     setValue(email);
-    onSelect(userId);  // Pass userId (Long) to the parent component
+    onSelect(userId);
   };
 
   return (
@@ -70,7 +70,7 @@ const FindByEmail: React.FC<{ onSelect: (userId: number) => void }> = ({ onSelec
                     value={user.email}
                     onSelect={() => handleSelect(user.email, user.id)}
                   >
-                    {user.email}
+                    {user.email} {" - "} {user.jobRole.title}
                     <Check
                       className={cn("ml-auto", value === user.email ? "opacity-100" : "opacity-0")}
                     />

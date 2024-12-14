@@ -13,6 +13,14 @@ export const GET_ALL_BOARDS = gql`
         role
         email
         status
+        jobRole{
+          id
+          title
+          department{
+            id
+            name
+          }
+        }
       }
     }
   }
@@ -31,6 +39,14 @@ export const GET_BOARD_BY_USER = gql`
         role
         email
         status
+        jobRole{
+          id
+          title
+          department{
+            id
+            name
+          }
+        }
       }
     }
   }
@@ -49,6 +65,14 @@ export const GET_BOARD_BY_ID = gql`
         role
         email
         status
+        jobRole{
+          id
+          title
+          department{
+            id
+            name
+          }
+        }
       }
     }
   }
