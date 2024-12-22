@@ -1,23 +1,19 @@
-"use client";
-
 import React, { useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import OneLane from "../OneLane";
 import { useLanesByBoard } from "@/hooks/useLane";
 import { useCreateLane } from "@/hooks/useLane";
-import { LaneDTO as LaneType } from "@/types/datatypes";
+import { LaneandCards, LaneDTO as LaneType } from "@/types/datatypes";
 
 interface LanesProps {
   boardId: number;
-  onDueDateChange: (cardId: number, newDate: Date | null) => void;
   moveLane: (fromIndex: number, toIndex: number) => void;
-  moveCard: (fromLaneId: number, toLaneId: number, cardId: number) => void;
-  lanes: LaneType[];
+  moveCard: (fromLaneId: number, toLaneId: number, fromIndex: number, toIndex: number) => void;
+  lanes: LaneandCards[];
 }
 
 const Lanes: React.FC<LanesProps> = ({
   boardId,
-  onDueDateChange,
   moveLane,
   moveCard,
   lanes,
@@ -69,7 +65,6 @@ const Lanes: React.FC<LanesProps> = ({
           lane={lane}
           index={index}
           boardId={boardId}
-          onDueDateChange={onDueDateChange}
           moveLane={moveLane}
           moveCard={moveCard}
           refetchLanes={refetch}

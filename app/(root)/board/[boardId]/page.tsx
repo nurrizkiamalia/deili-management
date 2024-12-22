@@ -2,65 +2,142 @@
 
 import { useParams } from "next/navigation";
 import Board from "./components/Board";
-import { useBoardById } from "@/hooks/useBoard";  
+import { useBoardById } from "@/hooks/useBoard";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { useLanesByBoard, useReorderLanes } from '@/hooks/useLane';
+import { useLanesandCardByBoard, useReorderLanes } from "@/hooks/useLane";
 import { useEffect, useState } from "react";
-import { LaneDTO } from "@/types/datatypes";
+import { LaneandCards } from "@/types/datatypes";
+import { useMoveCardToLane, useReorderCardsInLane } from "@/hooks/useCard";
 
 const BoardPage = () => {
   const { boardId } = useParams();
   const id = Number(boardId);
-  const { board, loading, error } = useBoardById(id);  
+
+  const { board, loading: boardLoading, error: boardError } = useBoardById(id);
+  const {
+    lanesCard,
+    refetch: refetchLanesCard,
+    loading: lanesCardLoading,
+    error: lanesCardError,
+  } = useLanesandCardByBoard(id);
+
   const { handleReorderLanes } = useReorderLanes();
-  const { lanes, refetch, loading: lanesLoading, error: lanesError } = useLanesByBoard(id);
-  
-  const [sortedLanes, setSortedLanes] = useState<LaneDTO[]>([]);
+  const { handleMoveCardToLane } = useMoveCardToLane();
+  const { handleReorderCardsInLane } = useReorderCardsInLane();
+
+  const [sortedLanes, setSortedLanes] = useState<LaneandCards[]>([]);
 
   useEffect(() => {
-    if (lanes?.length > 0) {
-      const sorted = [...lanes].sort((a: LaneDTO, b: LaneDTO) => a.position - b.position);
-      setSortedLanes(sorted);
+    if (lanesCard?.length > 0) {
+      console.log("Updated lanesCard:", lanesCard);
+      const sorted = [...lanesCard].sort((a, b) => {
+        const posA = typeof a.position === 'string' ? parseInt(a.position) : a.position;
+        const posB = typeof b.position === 'string' ? parseInt(b.position) : b.position;
+        return posA - posB;
+      });
+      const lanesWithCards = sorted.map(lane => ({
+        ...lane,
+        cards: Array.isArray(lane.cards) ? lane.cards : []
+      }));
+      
+      setSortedLanes(lanesWithCards);
     }
-  }, [lanes]);
+  }, [lanesCard]);
 
-  if (lanesLoading || loading) {
-    return <p>Loading board...</p>;
-  }
+  const moveCard = async (
+    fromLaneId: number,
+    toLaneId: number,
+    fromIndex: number,
+    toIndex: number
+  ) => {
+    try {
+      const fromLane = sortedLanes.find((lane) => lane.id === fromLaneId);
+      const toLane = sortedLanes.find((lane) => lane.id === toLaneId);
+  
+      if (!fromLane || !toLane) {
+        console.error("Invalid lane IDs");
+        return;
+      }
 
-  if (lanesError || error) {
-    return <p>Error loading board or lanes: {lanesError?.message || error?.message}</p>;
-  }
-
-  const handleDueDateChange = (cardId: number, newDate: Date | null) => {
-    console.log(`Updated card ${cardId} with new due date: ${newDate}`);
+      const sourceLaneCards = [...fromLane.cards];
+      const targetLaneCards = toLaneId === fromLaneId ? sourceLaneCards : [...toLane.cards];
+  
+      const [cardToMove] = sourceLaneCards.splice(fromIndex, 1);
+  
+      if (!cardToMove) {
+        console.error("Card not found at source index");
+        return;
+      }
+  
+      targetLaneCards.splice(toIndex, 0, { ...cardToMove, laneId: toLaneId });
+  
+      const updatedTargetLaneCards = targetLaneCards.map((card, index) => ({
+        ...card,
+        position: index, 
+      }));
+  
+      const updatedLanes = sortedLanes.map((lane) => {
+        if (lane.id === fromLaneId) {
+          return { ...lane, cards: sourceLaneCards };
+        }
+        if (lane.id === toLaneId) {
+          return { ...lane, cards: updatedTargetLaneCards };
+        }
+        return lane;
+      });
+  
+      setSortedLanes(updatedLanes);
+  
+      if (fromLaneId === toLaneId) {
+        await handleReorderCardsInLane(
+          toLaneId,
+          updatedTargetLaneCards.map((c) => c.id)
+        );
+      } else {
+        await handleMoveCardToLane({
+          cardId: cardToMove.id,
+          targetLaneId: toLaneId,
+        });
+      }
+  
+      await refetchLanesCard();
+      refetchLanesCard();
+    } catch (error) {
+      console.error("Error moving card:", error);
+      await refetchLanesCard();
+      refetchLanesCard();
+    }
   };
-
-  const moveCard = (fromLaneId: number, toLaneId: number, cardId: number) => {
-    console.log(`Moving card ${cardId} from lane ${fromLaneId} to lane ${toLaneId}`);
-  };
-
+  
   const moveLane = async (fromIndex: number, toIndex: number) => {
     const updatedLanes = [...sortedLanes];
     const [movedLane] = updatedLanes.splice(fromIndex, 1);
     updatedLanes.splice(toIndex, 0, movedLane);
 
-    const laneIds = updatedLanes.map(lane => lane.id);
+    const laneIds = updatedLanes.map((lane) => lane.id);
 
     try {
       const result = await handleReorderLanes(id, laneIds);
 
       if (result) {
-        setSortedLanes(updatedLanes);  
-        await refetch(); 
+        setSortedLanes(updatedLanes);
+        await refetchLanesCard();
       } else {
-        console.error('Failed to reorder lanes');
+        console.error("Failed to reorder lanes");
       }
     } catch (error) {
-      console.error('Error reordering lanes:', error);
+      console.error("Error reordering lanes:", error);
     }
   };
+
+  if (lanesCardLoading || boardLoading) {
+    return <p>Loading board...</p>;
+  }
+
+  if (lanesCardError || boardError) {
+    return <p>Error loading board or lanes: {lanesCardError?.message || boardError?.message}</p>;
+  }
 
   if (!board) {
     return <p>Board not found</p>;
@@ -71,7 +148,6 @@ const BoardPage = () => {
       <div className="w-full h-full overflow-x-hidden">
         <Board
           board={board}
-          onDueDateChange={handleDueDateChange}
           moveLane={moveLane}
           moveCard={moveCard}
           lanes={sortedLanes}

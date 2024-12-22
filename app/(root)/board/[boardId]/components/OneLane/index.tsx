@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { IoMdMore } from "react-icons/io";
 import { FaPlus } from "react-icons/fa";
-import { LaneDTO as LaneType } from "@/types/datatypes";
+import { LaneandCards, LaneDTO as LaneType } from "@/types/datatypes";
 import { useDeleteLane, useUpdateLane } from "@/hooks/useLane";
 import { useCreateCard, useCardsByLane } from "@/hooks/useCard";
 import { useDrag, useDrop } from "react-dnd";
@@ -13,18 +13,16 @@ import CardWrapper from "../CardWrapper";
 interface OneLaneProps {
   lane: LaneType;
   index: number;
-  onDueDateChange: (cardId: number, newDate: Date | null) => void;
   moveLane: (fromIndex: number, toIndex: number) => void;
   moveCard: (fromLaneId: number, toLaneId: number, fromIndex: number, toIndex: number) => void;
   refetchLanes: () => void;
   boardId: number;
-  lanes: LaneType[];
+  lanes: LaneandCards[];
 }
 
 const OneLane: React.FC<OneLaneProps> = ({
   lane,
   index,
-  onDueDateChange,
   moveLane,
   moveCard,
   refetchLanes,
@@ -67,8 +65,6 @@ const OneLane: React.FC<OneLaneProps> = ({
     e.stopPropagation();
     setIsMenuOpen((prev) => !prev);
   };
-
-  const closeMenu = () => setIsMenuOpen(false);
 
   const confirmDelete = () => setIsAlertOpen(true);
 
@@ -203,15 +199,15 @@ const OneLane: React.FC<OneLaneProps> = ({
         {loadingCards ? (
           <p>Loading cards...</p>
         ) : (
-          cards.map((card: any, index: number) => (
+          cards.map((card: any, cardindex: number) => (
             <CardWrapper
               key={card.id}
               card={card}
-              cardIndex={index}
+              cardIndex={cardindex}
               laneId={lane.id}
-              onDueDateChange={onDueDateChange}
               moveCard={moveCard}
               boardId={boardId}
+              lanes={lanes}
             />
           ))
         )}

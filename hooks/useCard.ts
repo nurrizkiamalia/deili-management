@@ -12,6 +12,8 @@ import {
   REORDER_CARDS_IN_LANE,
   MOVE_CARD_TO_LANE,
 } from "@/graphql/mutation/cardMutation";
+import client from "@/lib/apollo-client";
+import { CardDto, LaneDTO } from "@/types/datatypes";
 
 export const useCards = () => {
   const { data, loading, error } = useQuery(GET_ALL_CARDS);
@@ -23,6 +25,26 @@ export const useCards = () => {
   };
 };
 
+export const fetchCardsForLanes = async (lanes: LaneDTO[]): Promise<Record<number, CardDto[]>> => {
+  const cardsMap: Record<number, CardDto[]> = {}; 
+
+  for (const lane of lanes) {
+    try {
+      const { data } = await client.query({
+        query: GET_CARDS_BY_LANE,
+        variables: { laneId: lane.id },
+      });
+
+      cardsMap[lane.id] = data?.getCardsByLane || [];
+    } catch (error) {
+      console.error(`Error fetching cards for lane ${lane.id}:`, error);
+      cardsMap[lane.id] = [];
+    }
+  }
+
+  return cardsMap;
+};
+
 export const useCardsByLane = (laneId: number) => {
   const { data, loading, error, refetch } = useQuery(GET_CARDS_BY_LANE, {
     variables: { laneId },
@@ -31,9 +53,9 @@ export const useCardsByLane = (laneId: number) => {
 
   return {
     cards: data?.getCardsByLane || [],
-    refetch,
     loading,
     error,
+    refetch,
   };
 };
 
@@ -156,7 +178,7 @@ export const useReorderCardsInLane = () => {
 export const useMoveCardToLane = () => {
   const [moveCardToLane, { loading, error }] = useMutation(MOVE_CARD_TO_LANE);
 
-  const handleMoveCardToLane = async (variables: { cardId: number; targetLaneId: number; newPosition: number }) => {
+  const handleMoveCardToLane = async (variables: { cardId: number; targetLaneId: number}) => {
     try {
       const response = await moveCardToLane({ variables });
       return response.data?.moveCardToLane;

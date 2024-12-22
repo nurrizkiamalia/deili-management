@@ -32,3 +32,22 @@ export const GET_LANES_BY_BOARD = gql`
     }
   }
 `;
+
+export const GET_LANESWITHCARD_BY_BOARD = gql`
+  query GetLanesWithCardsByBoard($boardId: ID!) {
+    getLanesWithCardsByBoard(boardId: $boardId) {
+      id
+      laneName
+      boardId
+      position
+      cards{
+        id
+        cardName
+        cardDesc
+        dueDate
+        position
+        laneId
+      }
+    }
+  }
+`;

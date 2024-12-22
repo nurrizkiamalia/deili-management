@@ -51,13 +51,13 @@ export const DELETE_CARD = gql`
 
 export const REORDER_CARDS_IN_LANE = gql`
     mutation ReorderCardsInLane($laneId: ID!, $cardIds: [ID!]!) {
-        reorderCardsInLane(laneId: $laneId, cardIds: $cardIds)
+        reorderCardsInlane(laneId: $laneId, cardIds: $cardIds)
     }
 `;
 
 export const MOVE_CARD_TO_LANE = gql`
-    mutation MoveCardToLane($cardId: ID!, $targetLaneId: ID!, $newPosition: Int!) {
-        moveCardToLane(cardId: $cardId, targetLaneId: $targetLaneId, newPosition: $newPosition)
+    mutation MoveCardToLane($cardId: ID!, $targetLaneId: ID!) {
+        moveCardToLane(cardId: $cardId, targetLaneId: $targetLaneId)
     }
 `;
 

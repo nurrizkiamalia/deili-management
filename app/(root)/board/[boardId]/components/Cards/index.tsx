@@ -3,28 +3,31 @@
 import React, { useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { CardDto } from "@/types/datatypes";
-import { useUpdateCard } from "@/hooks/useCard";
+import { useCardsByLane, useUpdateCard } from "@/hooks/useCard";
 import { useGetLabelsByCard, useGetChecklistsByCard } from "@/hooks/useCardContent";
 import CardAssignee from "../CardAssignee";
 import Label from "../Label";
 import Checklist from "../Checklist";
 import DateTimePickerComponent from "../DateTimePicker";
+import { useLanesandCardByBoard } from "@/hooks/useLane";
 
 interface CardsProps {
   card: CardDto;
+  laneId: number;
   boardId: number;
   laneIndex: number;
   cardIndex: number;
-  onDueDateChange: (cardId: number, newDate: Date | null) => void;
-  moveCard: (fromLane: number, toLane: number, fromIndex: number, toIndex: number) => void;
+  moveCard: (fromLaneId: number, toLaneId: number, fromIndex: number, toIndex: number) => void;
 }
 
-const Cards: React.FC<CardsProps> = ({ card, boardId, laneIndex, cardIndex, onDueDateChange, moveCard }) => {
+const Cards: React.FC<CardsProps> = ({ card, boardId, laneIndex, cardIndex, moveCard, laneId }) => {
   const ref = React.useRef<HTMLDivElement>(null);
+  const { refetch: refetchLanesCard } = useLanesandCardByBoard(boardId);
   const [cardName, setCardName] = useState(card.cardName);
   const [cardDesc, setCardDesc] = useState(card.cardDesc);
   const [isHovered, setIsHovered] = useState(false);
   const { handleUpdateCard, loading: updatingCard, error: updateError } = useUpdateCard();
+  const {  refetch: refetchCards } = useCardsByLane(laneId);
 
   const { labels, loading: labelsLoading, error: labelsError } = useGetLabelsByCard(card.id);
   const { checklists, loading: checklistsLoading, error: checklistsError } = useGetChecklistsByCard(card.id);
@@ -47,6 +50,8 @@ const Cards: React.FC<CardsProps> = ({ card, boardId, laneIndex, cardIndex, onDu
         moveCard(item.laneIndex, laneIndex, item.cardIndex, cardIndex);
         item.laneIndex = laneIndex;
         item.cardIndex = cardIndex;
+        refetchCards();
+        refetchLanesCard();
       }
     },
   });
@@ -119,7 +124,11 @@ const Cards: React.FC<CardsProps> = ({ card, boardId, laneIndex, cardIndex, onDu
       >
         <p className="w-full px-1 pt-1 max-h-[250px]">
           <textarea
-            className="rounded-xl px-1 h-full max-h-[250px] scrollbar-none w-full"
+            minLength={50}
+            maxLength={150}
+            rows={2}
+            aria-rowspan={3}
+            className="rounded-xl px-1 h-full max-h-[250px] resize-none scrollbar-none w-full"
             placeholder="Card Desc..."
             value={cardDesc}
             onChange={(e) => setCardDesc(e.target.value)}

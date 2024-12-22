@@ -39,7 +39,7 @@ export default function Home() {
   // }
 
   const filteredBoards = boards.filter((board: boards) =>
-    board.assignees?.some((assignee: any) => assignee.status === "PENDING") !== true
+    board.assignees?.some((assignee: any) => assignee.status === "ACCEPTED") 
   );
 
   return (

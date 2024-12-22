@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { BsPencil } from "react-icons/bs";
 import { useUpdateBoard } from "@/hooks/useBoard";
-import { boards } from "@/types/datatypes";
+import { boards, LaneandCards } from "@/types/datatypes";
 import BoardInvitation from "../BoardInvitation";
 import BoardAssignee from "../BoardAssignee";
 import { useBoardById } from "@/hooks/useBoard";
@@ -13,15 +13,13 @@ import Lanes from "../Lanes";
 
 interface BoardProps {
   board: boards;
-  onDueDateChange: (cardId: number, newDate: Date | null) => void;
   moveLane: (fromIndex: number, toIndex: number) => void;
-  moveCard: (fromLaneId: number, toLaneId: number, cardId: number) => void;
-  lanes: LaneType[];
+  moveCard: (fromLaneId: number, toLaneId: number, fromIndex: number, toIndex: number) => void;
+  lanes: LaneandCards[];
 }
 
 const Board: React.FC<BoardProps> = ({
   board,
-  onDueDateChange,
   moveLane,
   moveCard,
   lanes,
@@ -91,7 +89,7 @@ const Board: React.FC<BoardProps> = ({
                 onChange={(e) => setBoardDesc(e.target.value)}
                 onBlur={handleBoardUpdate}
                 onKeyDown={handleKeyDown}
-                className="text-dspGray w-full lg:w-[80%] px-2 py-1 rounded-xl focus:outline-none focus:ring border transition-all duration-300"
+                className="text-dspGray w-full lg:w-[80%] px-2 py-1 rounded-xl focus:outline-none focus:ring border transition-all duration-300 resize-none"
                 placeholder="Add a board description..."
               />
               <BsPencil className="text-gray-500" />
@@ -113,7 +111,6 @@ const Board: React.FC<BoardProps> = ({
       <div className="h-full">
         <Lanes
           boardId={Number(boardId)}
-          onDueDateChange={onDueDateChange}
           moveLane={moveLane}
           moveCard={moveCard}
           lanes={lanes}

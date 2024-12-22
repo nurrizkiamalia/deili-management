@@ -71,6 +71,14 @@ export interface LaneDTO {
   position: number;
 }
 
+export interface LaneandCards{
+  id: number;
+  laneName: string;
+  boardId: number;
+  position: number;
+  cards: CardDto[];
+}
+
 export interface LaneInputDTO {
   laneName: string;
   boardId: number;

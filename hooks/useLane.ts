@@ -3,6 +3,7 @@ import {
   GET_ALL_LANES,
   GET_LANE_BY_ID,
   GET_LANES_BY_BOARD,
+  GET_LANESWITHCARD_BY_BOARD
 } from '@/graphql/query/laneQuery';
 import {
   CREATE_LANE,
@@ -29,6 +30,21 @@ export const useLanesByBoard = (boardId: number) => {
 
   return {
     lanes: data?.getLanesByBoard || [],
+    refetch,
+    loading,
+    error,
+  };
+
+};
+
+export const useLanesandCardByBoard = (boardId: number) => {
+  const { data, loading, error, refetch } = useQuery(GET_LANESWITHCARD_BY_BOARD, {
+    variables: { boardId },
+    skip: !boardId,
+  });
+
+  return {
+    lanesCard: data?.getLanesWithCardsByBoard || [],
     refetch,
     loading,
     error,
