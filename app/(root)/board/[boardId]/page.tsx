@@ -94,11 +94,13 @@ const BoardPage = () => {
           toLaneId,
           updatedTargetLaneCards.map((c) => c.id)
         );
+        await refetchLanesCard();
       } else {
         await handleMoveCardToLane({
           cardId: cardToMove.id,
           targetLaneId: toLaneId,
         });
+        await refetchLanesCard();
       }
   
       await refetchLanesCard();

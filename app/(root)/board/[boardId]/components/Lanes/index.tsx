@@ -54,6 +54,7 @@ const Lanes: React.FC<LanesProps> = ({
     if (e.key === "Enter") {
       e.preventDefault();
       handleNewLane();
+      refetch(); 
     }
   };
 

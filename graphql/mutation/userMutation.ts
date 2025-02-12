@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 
 export const REGISTER_USER = gql`
-  mutation RegisterUser(
+  mutation registerUser(
     $firstName: String!
     $lastName: String!
     $email: String!
@@ -48,25 +48,25 @@ export const UPDATE_PROFILE_MUTATION = gql`
 `;
 
 export const REQUEST_PASSWORD_RESET = gql`
-  mutation RequestPasswordReset($email: String!) {
+  mutation requestPasswordReset($email: String!) {
     requestPasswordReset(email: $email)
   }
 `;
 
 export const RESET_PASSWORD = gql`
-  mutation ResetPassword($email: String!, $token: String!, $newPassword: String!) {
+  mutation resetPassword($email: String!, $token: String!, $newPassword: String!) {
     resetPassword(email: $email, token: $token, newPassword: $newPassword)
   }
 `;
 
 export const RESEND_VERIFICATION_EMAIL = gql`
-  mutation ResendVerificationEmail($userId: ID!) {
+  mutation resendVerificationEmail($userId: ID!) {
     resendVerificationEmail(userId: $userId)
   }
 `;
 
 export const VERIFY_EMAIL = gql`
-  mutation VerifyUserEmail($token: String!) {
+  mutation verifyUserEmail($token: String!) {
     verifyUserEmail(token: $token)
   }
 `;

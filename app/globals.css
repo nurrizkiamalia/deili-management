@@ -6,6 +6,19 @@
   scrollbar-width: none;
 }
 
+.empty-lane-placeholder {
+  border: 2px dashed #ccc;
+  padding: 16px;
+  text-align: center;
+  color: #999;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.empty-lane-placeholder:hover {
+  background-color: #f0f0f0;
+}
+
 .custom-date-time-picker {
   width: 100%;
   font-family: inherit;

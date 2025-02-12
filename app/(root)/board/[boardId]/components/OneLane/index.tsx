@@ -30,6 +30,7 @@ const OneLane: React.FC<OneLaneProps> = ({
   lanes,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
+  const cardDropRef = useRef<HTMLDivElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [updatedLaneName, setUpdatedLaneName] = useState(lane.laneName);
@@ -58,6 +59,28 @@ const OneLane: React.FC<OneLaneProps> = ({
       }
     },
   });
+
+  const [, dropCard] = useDrop({
+    accept: "CARD",
+    canDrop: () => true, // ✅ Allow dropping anywhere in the lane
+    drop: (draggedItem: { laneId: number | undefined; cardIndex: number }) => {
+      const sourceLaneId = draggedItem.laneId;
+      const targetLaneId = lane.id;
+  
+      if (!sourceLaneId) {
+        console.error("❌ sourceLaneId is undefined when dropping card into lane:", targetLaneId);
+        return;
+      }
+  
+      console.log(`✅ Dropping card ${draggedItem.cardIndex} from lane ${sourceLaneId} to empty lane ${targetLaneId}`);
+  
+      moveCard(sourceLaneId, targetLaneId, draggedItem.cardIndex, 0);
+      draggedItem.laneId = targetLaneId; // ✅ Update laneId after drop
+      draggedItem.cardIndex = 0;
+    },
+  });
+  
+  dropCard(cardDropRef);  
 
   drag(drop(ref));
 
@@ -198,18 +221,25 @@ const OneLane: React.FC<OneLaneProps> = ({
       <div className="flex flex-col gap-2">
         {loadingCards ? (
           <p>Loading cards...</p>
-        ) : (
-          cards.map((card: any, cardindex: number) => (
+        ) : cards.length > 0 ? (
+          cards.map((card: any, cardIndex: number) => (
             <CardWrapper
               key={card.id}
               card={card}
-              cardIndex={cardindex}
+              cardIndex={cardIndex}
               laneId={lane.id}
               moveCard={moveCard}
               boardId={boardId}
               lanes={lanes}
             />
           ))
+        ) : (
+          <div
+            className="empty-lane-placeholder border-2 border-dashed border-gray-400 text-gray-500 text-center p-4"
+            style={{ minHeight: "100px" }}
+          >
+            Drag a card here
+          </div>
         )}
       </div>
 

@@ -24,30 +24,33 @@ const CardWrapper: React.FC<CardWrapperProps> = ({
 
   const [{ isDragging }, drag] = useDrag({
     type: "CARD",
-    item: { laneId, cardIndex, cardId: card.id },
+    item: () => {
+      console.log(`🔍 Dragging card ${card.id} from lane ${laneId}`);
+      return { laneId, cardIndex, cardId: card.id };
+    },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });
-
+  
+  
   const [, drop] = useDrop({
     accept: "CARD",
     hover: (draggedItem: { laneId: number; cardIndex: number; cardId: number }) => {
-      if (!ref.current) return;
-  
       const sourceLaneId = draggedItem.laneId;
       const targetLaneId = laneId;
-      if (sourceLaneId === targetLaneId && draggedItem.cardIndex === cardIndex) {
-        return;
+  
+      if (sourceLaneId !== targetLaneId) {
+        console.log(`Moving card ${draggedItem.cardId} from lane ${sourceLaneId} to ${targetLaneId}`);
+  
+        moveCard(sourceLaneId, targetLaneId, draggedItem.cardIndex, cardIndex);
+        draggedItem.laneId = targetLaneId;
+        draggedItem.cardIndex = cardIndex;
       }
-  
-      moveCard(sourceLaneId, targetLaneId, draggedItem.cardIndex, cardIndex);
-      draggedItem.laneId = targetLaneId;
-      draggedItem.cardIndex = cardIndex;
     },
-  });  
+  });
   
-  drag(drop(ref));
+  drag(drop(ref));  
 
   return (
     <div
