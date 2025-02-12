@@ -1,26 +1,106 @@
+import React, { useState } from "react";
+import { FaPlus } from "react-icons/fa";
 import OneLane from "../OneLane";
-import { lanes } from "@/types/datatypes";
+import { useLanesByBoard } from "@/hooks/useLane";
+import { useCreateLane } from "@/hooks/useLane";
+import { LaneandCards, LaneDTO as LaneType } from "@/types/datatypes";
 
 interface LanesProps {
-  lanes: lanes[];
-  onDueDateChange: (cardId: number, newDate: Date | null) => void;
+  boardId: number;
   moveLane: (fromIndex: number, toIndex: number) => void;
-  moveCard: (fromLaneId: number, toLaneId: number, cardId: number) => void;
+  moveCard: (fromLaneId: number, toLaneId: number, fromIndex: number, toIndex: number) => void;
+  lanes: LaneandCards[];
 }
 
-const Lanes: React.FC<LanesProps> = ({ lanes, onDueDateChange, moveLane, moveCard }) => {
+const Lanes: React.FC<LanesProps> = ({
+  boardId,
+  moveLane,
+  moveCard,
+  lanes,
+}) => {
+  const { refetch } = useLanesByBoard(boardId);
+  const { handleCreateLane, loading: creatingLane, error: createLaneError } = useCreateLane();
+  const [newLaneName, setNewLaneName] = useState("");
+  const [isInputVisible, setIsInputVisible] = useState(false);
+
+  const handleNewLane = async () => {
+    if (!newLaneName.trim()) {
+      setIsInputVisible(false);
+      return;
+    }
+
+    try {
+      const newLane = {
+        laneName: newLaneName.trim(),
+        boardId: boardId,
+        position: lanes.length, 
+      };
+
+      await handleCreateLane(newLane);
+      setNewLaneName(""); 
+      setIsInputVisible(false); 
+      refetch(); 
+    } catch (err) {
+      console.error("Error creating lane:", err);
+      alert("Failed to create lane. Please try again.");
+    }
+  };
+
+  const handleBlur = () => {
+    setIsInputVisible(false); 
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleNewLane();
+      refetch(); 
+    }
+  };
+
   return (
-    <div className="flex gap-5 p-5">
-      {lanes.map((lane, index) => (
+    <div className="flex gap-5 p-5 overflow-auto">
+      {lanes?.map((lane: any, index: number) => (
         <OneLane
-          key={lane.laneId}
+          key={lane.id}
           lane={lane}
           index={index}
-          onDueDateChange={onDueDateChange}
+          boardId={boardId}
           moveLane={moveLane}
           moveCard={moveCard}
+          refetchLanes={refetch}
+          lanes={lanes}
         />
       ))}
+
+      {/* Add Lane Button */}
+      <div className="flex flex-col gap-2 w-72 bg-white p-2 rounded-xl shadow-md">
+        <button
+          className="flex items-center gap-2 font-bold justify-center p-4 w-full border-dashed border-2 rounded-xl border-dspOrange text-dspOrange"
+          onClick={() => setIsInputVisible(true)} 
+          disabled={creatingLane}
+        >
+          {creatingLane ? "Creating..." : "New Lane"} <FaPlus className="text-lg" />
+        </button>
+
+        {/* Lane Input Field */}
+        {isInputVisible && (
+          <input
+            type="text"
+            className="p-2 border rounded-xl"
+            placeholder="New Lane Name..."
+            value={newLaneName}
+            onChange={(e) => setNewLaneName(e.target.value)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown} 
+            autoFocus
+          />
+        )}
+      </div>
+
+      {createLaneError && (
+        <p className="text-red-500 mt-2">Failed to create lane. Please try again.</p>
+      )}
     </div>
   );
 };

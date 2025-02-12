@@ -1,30 +1,37 @@
 "use client";
 
 import { useState } from "react";
-import { RiMenu2Line, RiDashboardHorizontalLine, RiNotification4Line, RiLogoutBoxRLine } from "react-icons/ri";
+import { RiMenu2Line, RiDashboardHorizontalLine, RiNotification4Line } from "react-icons/ri";
 import { TbPointFilled } from "react-icons/tb";
 import { GoProject } from "react-icons/go";
 import { useUser } from "@/hooks/useUser";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { boards } from "@/types/datatypes";
+import NotificationCount from "../NotificationCount";
+import { useBoardByUser } from "@/hooks/useBoard";
 
 interface SideNavProps {
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
+  boards?: boards[];
 }
 
 const projects = [
-  { id: 1, name: "Project 1", link: "/board" },
-  { id: 2, name: "Project 2", link: "/board" },
+  { id: 1, name: "Project 1", link: "/board/1" },
+  { id: 2, name: "Project 2", link: "/board/2" },
 ];
 
-const SideNav: React.FC<SideNavProps> = ({ isOpen, setIsOpen }) => {
+const SideNav: React.FC<SideNavProps> = ({ isOpen, setIsOpen, boards = []  }) => {
   const { user, loading } = useUser();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { pendingInvitations } = useBoardByUser(user?.id);
 
   const getUserInitials = () => {
-    if (!user) return "U"; 
-    const initials = `${user.firstName[0] || ""}${user.lastName[0] || ""}`.toUpperCase();
+    if (!user) return "U";
+    const initials = `${user.firstName[0] || ""}${
+      user.lastName[0] || ""
+    }`.toUpperCase();
     return initials;
   };
 
@@ -48,7 +55,10 @@ const SideNav: React.FC<SideNavProps> = ({ isOpen, setIsOpen }) => {
           <h1 className="p-5 text-center font-bold text-xl">D</h1>
           <hr className="border-dashed border-dspGray" />
           <div className="font-bold text-xl flex flex-col items-center p-5 gap-5">
-            <RiMenu2Line className="text-dspOrange text-xl" />
+            <div className="relative items-center">
+              <RiMenu2Line className="text-dspOrange text-xl" />
+                <NotificationCount boards={pendingInvitations}/>
+            </div>
             <GoProject className="text-dspOrange text-xl" />
           </div>
           <div className="h-full w-full flex items-end justify-center pb-5">
@@ -77,12 +87,19 @@ const SideNav: React.FC<SideNavProps> = ({ isOpen, setIsOpen }) => {
               <RiMenu2Line className="text-dspOrange text-xl" /> MAIN MENU
             </p>
             <div className="flex flex-col gap-3 ml-8 font-semibold">
-              <Link className="flex items-center gap-1 hover:text-dspOrange " href="/">
+              <Link
+                className="flex items-center gap-1 hover:text-dspOrange "
+                href="/"
+              >
                 <RiDashboardHorizontalLine /> Dashboard
               </Link>
-              <button className="flex items-center gap-1 hover:text-dspOrange">
+              <Link
+                className="flex items-center gap-1 hover:text-dspOrange relative"
+                href="/notification"
+              >
                 <RiNotification4Line /> Notification
-              </button>
+                <NotificationCount boards={pendingInvitations}/>
+              </Link>
             </div>
           </div>
 
@@ -131,9 +148,7 @@ const SideNav: React.FC<SideNavProps> = ({ isOpen, setIsOpen }) => {
 
                 {/* Dropdown Menu */}
                 {isDropdownOpen && (
-                  <div
-                    className="absolute z-50 left-40 -top-4 w-full mt-2 bg-white rounded-lg shadow-lg border-2 font-semibold"
-                  >
+                  <div className="absolute z-50 left-[90%] -top-4 w-full mt-2 bg-white rounded-lg shadow-lg border-2 font-semibold">
                     <Link
                       href="/profile"
                       className="block px-4 py-2 text-dspDarkGray hover:bg-dspLightGray"
@@ -154,7 +169,13 @@ const SideNav: React.FC<SideNavProps> = ({ isOpen, setIsOpen }) => {
                 className="h-full w-full flex items-end p-5 gap-5 justify-center font-bold"
                 onMouseLeave={() => setIsDropdownOpen(false)}
               >
-                <Link href="/login" className="hover:text-dspOrange">Login</Link> | <Link href="/register" className="hover:text-dspOrange">Register</Link>
+                <Link href="/login" className="hover:text-dspOrange">
+                  Login
+                </Link>{" "}
+                |{" "}
+                <Link href="/register" className="hover:text-dspOrange">
+                  Register
+                </Link>
               </div>
             )}
           </div>

@@ -1,47 +1,70 @@
 import React, { useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import Cards from "../Cards";
-import { cards } from "@/types/datatypes";
+import { CardDto, LaneandCards } from "@/types/datatypes";
 
 interface CardWrapperProps {
-  card: cards;
+  boardId: number;
+  card: CardDto;
   cardIndex: number;
   laneId: number;
-  onDueDateChange: (cardId: number, newDate: Date | null) => void;
   moveCard: (fromLaneId: number, toLaneId: number, fromIndex: number, toIndex: number) => void;
+  lanes: LaneandCards[];
 }
 
-const CardWrapper: React.FC<CardWrapperProps> = ({ card, cardIndex, laneId, onDueDateChange, moveCard }) => {
+const CardWrapper: React.FC<CardWrapperProps> = ({
+  card,
+  boardId,
+  cardIndex,
+  laneId,
+  moveCard,
+  lanes,
+}) => {
   const ref = useRef<HTMLDivElement>(null);
 
   const [{ isDragging }, drag] = useDrag({
     type: "CARD",
-    item: { laneId, cardIndex, cardId: card.cardId },
+    item: () => {
+      console.log(`🔍 Dragging card ${card.id} from lane ${laneId}`);
+      return { laneId, cardIndex, cardId: card.id };
+    },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });
-
+  
+  
   const [, drop] = useDrop({
     accept: "CARD",
-    hover: (draggedItem: { laneId: number; cardIndex: number }) => {
-      if (draggedItem.laneId !== laneId || draggedItem.cardIndex !== cardIndex) {
-        moveCard(draggedItem.laneId, laneId, draggedItem.cardIndex, cardIndex);
-        draggedItem.cardIndex = cardIndex; // Update dragged item index
+    hover: (draggedItem: { laneId: number; cardIndex: number; cardId: number }) => {
+      const sourceLaneId = draggedItem.laneId;
+      const targetLaneId = laneId;
+  
+      if (sourceLaneId !== targetLaneId) {
+        console.log(`Moving card ${draggedItem.cardId} from lane ${sourceLaneId} to ${targetLaneId}`);
+  
+        moveCard(sourceLaneId, targetLaneId, draggedItem.cardIndex, cardIndex);
+        draggedItem.laneId = targetLaneId;
+        draggedItem.cardIndex = cardIndex;
       }
     },
   });
-
-  drag(drop(ref)); // Combine drag and drop refs
+  
+  drag(drop(ref));  
 
   return (
-    <div ref={ref} className={`mb-2 ${isDragging ? "opacity-50" : ""}`}>
+    <div
+      ref={ref}
+      className={`card-wrapper ${isDragging ? "opacity-50" : ""}`}
+      data-testid={`card-${card.id}`}
+    >
       <Cards
         card={card}
-        onDueDateChange={onDueDateChange}
-        laneIndex={laneId} // Ensure laneIndex is passed
-        cardIndex={cardIndex} // Ensure cardIndex is passed
-        moveCard={moveCard} // Pass the moveCard function
+        cardIndex={cardIndex}
+        laneIndex={laneId}
+        moveCard={moveCard}
+        boardId={boardId}
+        laneId={laneId}
       />
     </div>
   );

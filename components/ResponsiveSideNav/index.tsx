@@ -7,19 +7,27 @@ import { GoProject } from "react-icons/go";
 import { useUser } from "@/hooks/useUser";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import NotificationCount from "../NotificationCount";
+import { boards } from "@/types/datatypes";
+import { useBoardByUser } from "@/hooks/useBoard";
 
 const projects = [
-  { id: 1, name: "Project 1", link: "/project" },
-  { id: 2, name: "Project 2", link: "/project" },
+  { id: 1, name: "Project 1", link: "/board/1" },
+  { id: 2, name: "Project 2", link: "/board/2" },
 ];
 
-const ResponsiveSideNav: React.FC = () => {
+interface SideNavProps {
+  boards?: boards[];
+}
+
+const ResponsiveSideNav: React.FC<SideNavProps> = ({boards = []}) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { user, loading } = useUser();
+  const { pendingInvitations } = useBoardByUser(user?.id);
 
   const getUserInitials = () => {
-    if (!user) return "U"; // Default initials
+    if (!user) return "U";
     const initials = `${user.firstName[0] || ""}${user.lastName[0] || ""}`.toUpperCase();
     return initials;
   };
@@ -57,9 +65,10 @@ const ResponsiveSideNav: React.FC = () => {
               <Link className="flex items-center gap-1 hover:text-dspOrange" href="/">
                 <RiDashboardHorizontalLine /> Dashboard
               </Link>
-              <button className="flex items-center gap-1 hover:text-dspOrange">
+              <Link className="flex items-center gap-1 hover:text-dspOrange relative" href="/notification">
                 <RiNotification4Line /> Notification
-              </button>
+                <NotificationCount boards={pendingInvitations}/>
+              </Link>
             </div>
           </div>
 
